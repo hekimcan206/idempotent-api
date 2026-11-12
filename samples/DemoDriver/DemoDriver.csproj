@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>DemoDriver</RootNamespace>
+    <Description>Drives the docker compose demo: fires concurrent duplicates at two API instances and asserts single execution.</Description>
+  </PropertyGroup>
+
+</Project>

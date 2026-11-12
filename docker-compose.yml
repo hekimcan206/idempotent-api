@@ -1,0 +1,51 @@
+# docker compose up --build
+# Two instances of the sample payments API share one Redis; the demo container fires concurrent duplicate
+# requests at both and exits 0 only if every charge ran exactly once and the shared rate limit held.
+name: idempotent-api
+
+services:
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 2s
+      retries: 15
+
+  api-a:
+    build: .
+    image: idempotent-api-sample:local
+    environment:
+      ConnectionStrings__Redis: redis:6379
+      Payments__InstanceName: api-a
+    ports:
+      - "127.0.0.1:${API_A_PORT:-58180}:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  api-b:
+    image: idempotent-api-sample:local
+    pull_policy: never
+    environment:
+      ConnectionStrings__Redis: redis:6379
+      Payments__InstanceName: api-b
+    ports:
+      - "127.0.0.1:${API_B_PORT:-58181}:8080"
+    depends_on:
+      redis:
+        condition: service_healthy
+      api-a:
+        condition: service_started
+
+  demo:
+    image: idempotent-api-sample:local
+    pull_policy: never
+    entrypoint: ["dotnet", "/app/driver/DemoDriver.dll", "http://api-a:8080", "http://api-b:8080"]
+    restart: "no"
+    depends_on:
+      api-a:
+        condition: service_started
+      api-b:
+        condition: service_started

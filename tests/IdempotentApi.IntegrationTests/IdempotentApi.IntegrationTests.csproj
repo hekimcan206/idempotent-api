@@ -9,6 +9,7 @@
     <PackageReference Include="xunit.v3" />
     <PackageReference Include="AwesomeAssertions" />
     <PackageReference Include="Microsoft.AspNetCore.TestHost" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Testcontainers" />
     <PackageReference Include="Testcontainers.Redis" />
     <PackageReference Include="Microsoft.Testing.Extensions.CodeCoverage" />
@@ -17,6 +18,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\IdempotentApi\IdempotentApi.csproj" />
     <ProjectReference Include="..\..\src\IdempotentApi.Redis\IdempotentApi.Redis.csproj" />
+    <ProjectReference Include="..\..\samples\PaymentsApi\PaymentsApi.csproj" />
+    <ProjectReference Include="..\..\samples\DemoDriver\DemoDriver.csproj" />
   </ItemGroup>
 
   <ItemGroup>
