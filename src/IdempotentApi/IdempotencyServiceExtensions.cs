@@ -1,0 +1,45 @@
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace IdempotentApi;
+
+public static class IdempotencyServiceExtensions
+{
+    /// <summary>
+    /// Registers the middleware's services. Uses <see cref="InMemoryIdempotencyStore"/> unless another
+    /// <see cref="IIdempotencyStore"/> is registered (for example by <c>AddRedisIdempotencyStore</c>).
+    /// </summary>
+    public static IServiceCollection AddIdempotency(this IServiceCollection services, Action<IdempotencyOptions>? configure = null)
+    {
+        services.AddOptions<IdempotencyOptions>();
+        if (configure is not null)
+        {
+            services.Configure(configure);
+        }
+
+        services.TryAddSingleton(TimeProvider.System);
+        services.TryAddSingleton<IRequestFingerprinter, Sha256RequestFingerprinter>();
+        services.TryAddSingleton<IIdempotencyStore>(sp => new InMemoryIdempotencyStore(sp.GetRequiredService<TimeProvider>()));
+        return services;
+    }
+
+    /// <summary>Adds the idempotency middleware. Call after <c>UseRouting</c> (and after authentication, if partitions use the user).</summary>
+    public static IApplicationBuilder UseIdempotency(this IApplicationBuilder app) => app.UseMiddleware<IdempotencyMiddleware>();
+
+    /// <summary>Makes an endpoint (or group) idempotent with the default policy, optionally adjusted.</summary>
+    public static TBuilder RequireIdempotency<TBuilder>(this TBuilder builder, Action<IdempotencyPolicy>? configure = null)
+        where TBuilder : IEndpointConventionBuilder
+    {
+        IdempotencyPolicy? policy = null;
+        if (configure is not null)
+        {
+            policy = new IdempotencyPolicy();
+            configure(policy);
+            policy.Validate();
+        }
+
+        builder.WithMetadata(new IdempotencyMetadata(policy));
+        return builder;
+    }
+}

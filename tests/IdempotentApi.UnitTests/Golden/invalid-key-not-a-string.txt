@@ -1,0 +1,4 @@
+400
+Content-Type: application/problem+json
+
+{"type":"https://github.com/hekimcan206/idempotent-api/blob/main/docs/idempotency-specification.md#invalid-key","title":"Idempotency-Key is invalid","status":400,"detail":"Idempotency-Key must be a quoted Structured Field string, for example \"8e03978e-40d5-43e8-bc93-6894a57f9324\"."}

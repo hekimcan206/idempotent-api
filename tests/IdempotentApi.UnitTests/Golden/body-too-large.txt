@@ -1,0 +1,4 @@
+413
+Content-Type: application/problem+json
+
+{"type":"https://github.com/hekimcan206/idempotent-api/blob/main/docs/idempotency-specification.md#body-too-large","title":"Request body too large for an idempotent request","status":413,"detail":"Idempotent requests are fingerprinted in full; the limit is 64 bytes."}

@@ -1,0 +1,4 @@
+400
+Content-Type: application/problem+json
+
+{"type":"https://github.com/hekimcan206/idempotent-api/blob/main/docs/idempotency-specification.md#invalid-key","title":"Idempotency-Key is invalid","status":400,"detail":"Idempotency-Key must be at least 16 characters; use a random value such as a UUID."}

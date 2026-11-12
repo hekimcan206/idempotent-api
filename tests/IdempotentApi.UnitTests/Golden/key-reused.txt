@@ -1,0 +1,4 @@
+422
+Content-Type: application/problem+json
+
+{"type":"https://github.com/hekimcan206/idempotent-api/blob/main/docs/idempotency-specification.md#key-reused","title":"Idempotency-Key is already used","status":422,"detail":"This key was already used with a different request (method, path, query, media type or body). Use a new key for a new request."}

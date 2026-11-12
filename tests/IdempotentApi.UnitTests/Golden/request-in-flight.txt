@@ -1,0 +1,5 @@
+409
+Content-Type: application/problem+json
+Retry-After: 1
+
+{"type":"https://github.com/hekimcan206/idempotent-api/blob/main/docs/idempotency-specification.md#request-in-flight","title":"A request is outstanding for this Idempotency-Key","status":409,"detail":"Another request with this key is being processed. Retry after it completes to receive its response."}
