@@ -1,0 +1,6 @@
+<Project>
+  <!-- Targets run after the project body, so a project's own IsPackable=true is visible here (it is not in .props). -->
+  <ItemGroup Condition="'$(IsPackable)' == 'true'">
+    <None Include="$(MSBuildThisFileDirectory)src/PACKAGE.md" Pack="true" PackagePath="\" Visible="false" />
+  </ItemGroup>
+</Project>
