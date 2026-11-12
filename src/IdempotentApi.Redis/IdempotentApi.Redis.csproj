@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>IdempotentApi.Redis</RootNamespace>
+    <PackageId>IdempotentApi.Redis</PackageId>
+    <Description>Redis stores for IdempotentApi.AspNetCore: atomic Lua scripts for single execution of concurrent same-key requests across instances (leases, owner tokens, fencing tokens) and a distributed token bucket that uses the Redis server clock.</Description>
+    <PackageTags>aspnetcore;idempotency;idempotency-key;redis;lua;rate-limiting;token-bucket;distributed</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="StackExchange.Redis" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\IdempotentApi\IdempotentApi.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Scripts\*.lua" LogicalName="IdempotentApi.Redis.Scripts.%(Filename).lua" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IdempotentApi.IntegrationTests" />
+    <InternalsVisibleTo Include="IdempotentApi.Benchmarks" />
+  </ItemGroup>
+
+</Project>

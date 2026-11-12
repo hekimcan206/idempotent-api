@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/IdempotentApi/IdempotentApi.csproj" />
+    <Project Path="src/IdempotentApi.Redis/IdempotentApi.Redis.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/IdempotentApi.UnitTests/IdempotentApi.UnitTests.csproj" />
+    <Project Path="tests/IdempotentApi.IntegrationTests/IdempotentApi.IntegrationTests.csproj" />
   </Folder>
 </Solution>
