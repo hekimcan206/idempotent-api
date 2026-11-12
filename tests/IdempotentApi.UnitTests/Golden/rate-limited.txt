@@ -1,0 +1,2 @@
+"burst";r=0;t=5
+{"type":"https://iana.org/assignments/http-problem-types#quota-exceeded","title":"Too Many Requests","status":429,"detail":"Quota of policy 'burst' exhausted; retry after the Retry-After interval.","violated-policies":["burst"]}
