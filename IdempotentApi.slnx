@@ -7,6 +7,9 @@
     <Project Path="samples/PaymentsApi/PaymentsApi.csproj" />
     <Project Path="samples/DemoDriver/DemoDriver.csproj" />
   </Folder>
+  <Folder Name="/benchmarks/">
+    <Project Path="benchmarks/IdempotentApi.Benchmarks/IdempotentApi.Benchmarks.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/IdempotentApi.UnitTests/IdempotentApi.UnitTests.csproj" />
     <Project Path="tests/IdempotentApi.IntegrationTests/IdempotentApi.IntegrationTests.csproj" />

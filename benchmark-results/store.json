@@ -1,0 +1,40 @@
+{
+  "scenario": "store",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
+    "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 08:57:51Z"
+  },
+  "result": [
+    {
+      "Operation": "PING (baseline round trip)",
+      "P50Ms": 0.84985,
+      "P99Ms": 3.4740910000000023
+    },
+    {
+      "Operation": "begin.lua (claim)",
+      "P50Ms": 0.95625,
+      "P99Ms": 5.981912
+    },
+    {
+      "Operation": "complete.lua (store 512 B response)",
+      "P50Ms": 0.8743,
+      "P99Ms": 8.663375000000014
+    },
+    {
+      "Operation": "begin.lua (completed -\u003E replay)",
+      "P50Ms": 0.87955,
+      "P99Ms": 4.747798000000005
+    },
+    {
+      "Operation": "token_bucket.lua (take)",
+      "P50Ms": 0.94615,
+      "P99Ms": 6.392279000000004
+    }
+  ]
+}

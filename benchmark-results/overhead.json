@@ -1,0 +1,67 @@
+{
+  "scenario": "overhead",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
+    "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 08:59:49Z"
+  },
+  "result": [
+    {
+      "configuration": "no middleware",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 45573.49226936851,
+      "p50MsMedian": 0.27785,
+      "p95MsMedian": 0.49711500000000003,
+      "p99MsMedian": 1.1535060000000001,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "in-memory store",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 17708.574243728774,
+      "p50MsMedian": 0.52245,
+      "p95MsMedian": 2.9955600000000007,
+      "p99MsMedian": 6.302173000000006,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "redis store, new keys",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 4778.263259943351,
+      "p50MsMedian": 2.8829000000000002,
+      "p95MsMedian": 5.539505000000005,
+      "p99MsMedian": 10.094660000000001,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "redis store, replays",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 9802.33589664417,
+      "p50MsMedian": 1.53985,
+      "p95MsMedian": 2.4738100000000003,
+      "p99MsMedian": 3.476894000000004,
+      "statuses": {
+        "201": 5000
+      }
+    }
+  ]
+}

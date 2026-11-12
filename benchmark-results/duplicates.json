@@ -1,0 +1,45 @@
+{
+  "scenario": "duplicates",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
+    "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 08:56:13Z"
+  },
+  "result": [
+    {
+      "implementation": "none",
+      "rounds": 30,
+      "copiesPerRound": 50,
+      "instances": 2,
+      "executionsMedian": 50,
+      "executionsMax": 50,
+      "executionsMin": 50,
+      "roundsWithDuplicates": 30
+    },
+    {
+      "implementation": "check-then-set",
+      "rounds": 30,
+      "copiesPerRound": 50,
+      "instances": 2,
+      "executionsMedian": 9,
+      "executionsMax": 15,
+      "executionsMin": 4,
+      "roundsWithDuplicates": 30
+    },
+    {
+      "implementation": "lua",
+      "rounds": 30,
+      "copiesPerRound": 50,
+      "instances": 2,
+      "executionsMedian": 1,
+      "executionsMax": 1,
+      "executionsMin": 1,
+      "roundsWithDuplicates": 0
+    }
+  ]
+}

@@ -1,0 +1,69 @@
+{
+  "scenario": "ratelimit",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
+    "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 08:59:11Z"
+  },
+  "result": [
+    {
+      "implementation": "lua (shared)",
+      "instances": 4,
+      "workersPerInstance": 8,
+      "seconds": 3,
+      "capacity": 50,
+      "refillPerSecond": 100,
+      "repeats": 3,
+      "admittedMedian": 349,
+      "boundMedian": 350.16014,
+      "admittedOverBound": 0.9966868302028894,
+      "admittedRuns": [
+        348,
+        349,
+        349
+      ],
+      "takesPerSecondMedian": 23063.707953707184
+    },
+    {
+      "implementation": "get-compute-set (shared)",
+      "instances": 4,
+      "workersPerInstance": 8,
+      "seconds": 3,
+      "capacity": 50,
+      "refillPerSecond": 100,
+      "repeats": 3,
+      "admittedMedian": 6086,
+      "boundMedian": 350.16668000000004,
+      "admittedOverBound": 17.380294435781266,
+      "admittedRuns": [
+        6086,
+        6064,
+        6177
+      ],
+      "takesPerSecondMedian": 15556.422244071537
+    },
+    {
+      "implementation": "in-memory (per instance)",
+      "instances": 4,
+      "workersPerInstance": 8,
+      "seconds": 3,
+      "capacity": 50,
+      "refillPerSecond": 100,
+      "repeats": 3,
+      "admittedMedian": 1400,
+      "boundMedian": 350.00186,
+      "admittedOverBound": 3.9999787429701086,
+      "admittedRuns": [
+        1400,
+        1400,
+        1400
+      ],
+      "takesPerSecondMedian": 6041507.216239795
+    }
+  ]
+}

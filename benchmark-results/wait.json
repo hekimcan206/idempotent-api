@@ -1,0 +1,22 @@
+{
+  "scenario": "wait",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
+    "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 08:56:28Z"
+  },
+  "result": {
+    "rounds": 10,
+    "copiesPerRound": 50,
+    "handlerMs": 100,
+    "executions": 10,
+    "allResponses201": true,
+    "latencyP50MedianMs": 128.52325000000002,
+    "latencyMaxMedianMs": 228.3662
+  }
+}
