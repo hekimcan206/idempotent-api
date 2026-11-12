@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>IdempotentApi</RootNamespace>
+    <PackageId>IdempotentApi.AspNetCore</PackageId>
+    <Description>ASP.NET Core middleware for the IETF Idempotency-Key header: request fingerprinting, single execution of concurrent same-key requests, response replay, and token-bucket rate limiting with RateLimit headers. Storage is pluggable; an in-memory store is included.</Description>
+    <PackageTags>aspnetcore;idempotency;idempotency-key;middleware;rate-limiting;token-bucket;ratelimit-headers</PackageTags>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="IdempotentApi.UnitTests" />
+    <InternalsVisibleTo Include="IdempotentApi.IntegrationTests" />
+    <InternalsVisibleTo Include="IdempotentApi.Benchmarks" />
+  </ItemGroup>
+
+</Project>
