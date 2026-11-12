@@ -1,0 +1,67 @@
+{
+  "scenario": "overhead",
+  "machine": {
+    "os": "Microsoft Windows 10.0.26200",
+    "arch": "X64",
+    "logicalCores": "16",
+    "dotnet": ".NET 10.0.12",
+    "cpu": "unknown",
+    "hostLoad": "unknown",
+    "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
+    "timestampUtc": "2026-11-12 09:01:29Z"
+  },
+  "result": [
+    {
+      "configuration": "no middleware",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 44274.54824464699,
+      "p50MsMedian": 0.2785,
+      "p95MsMedian": 0.5017350000000002,
+      "p99MsMedian": 1.018936000000003,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "in-memory store",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 20594.946823847302,
+      "p50MsMedian": 0.47004999999999997,
+      "p95MsMedian": 2.7444400000000004,
+      "p99MsMedian": 4.945892000000012,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "redis store, new keys",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 3541.195363073803,
+      "p50MsMedian": 3.28525,
+      "p95MsMedian": 13.947255000000004,
+      "p99MsMedian": 27.434642000000004,
+      "statuses": {
+        "201": 5000
+      }
+    },
+    {
+      "configuration": "redis store, replays",
+      "requests": 5000,
+      "concurrency": 16,
+      "repeats": 3,
+      "rpsMedian": 8166.213142409449,
+      "p50MsMedian": 1.742,
+      "p95MsMedian": 3.5455650000000003,
+      "p99MsMedian": 5.198822000000007,
+      "statuses": {
+        "201": 5000
+      }
+    }
+  ]
+}

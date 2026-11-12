@@ -185,8 +185,10 @@ public sealed partial class IdempotencyMiddleware(
     private async Task ExecuteAsync(HttpContext context, string key, string storageKey, IdempotencyLease lease, IdempotencyPolicy policy)
     {
         using var leaseLost = new CancellationTokenSource();
-        using var stopRenewal = new CancellationTokenSource();
-        var renewal = RenewUntilStoppedAsync(storageKey, lease.OwnerToken, policy.Lease, leaseLost, stopRenewal.Token);
+        // Renewal stops by disposing the timer, which ends WaitForNextTickAsync with false. Cancelling a token instead
+        // would throw an OperationCanceledException on every single request.
+        var renewalTimer = new PeriodicTimer(policy.Lease / 3, timeProvider);
+        var renewal = RenewUntilStoppedAsync(renewalTimer, storageKey, lease.OwnerToken, policy.Lease, leaseLost);
 
         context.Features.Set<IIdempotencyFeature>(new IdempotencyFeature(key, storageKey, lease.FencingToken, leaseLost.Token));
         var originalBody = context.Features.Get<IHttpResponseBodyFeature>()!;
@@ -202,7 +204,7 @@ public sealed partial class IdempotencyMiddleware(
         }
         catch
         {
-            await StopAsync(stopRenewal, renewal);
+            await StopAsync(renewalTimer, renewal);
             await TryReleaseAsync(storageKey, lease.OwnerToken);
             IdempotencyTelemetry.Record(IdempotencyOutcomes.Released);
             throw;
@@ -212,7 +214,7 @@ public sealed partial class IdempotencyMiddleware(
             context.Features.Set(originalBody);
         }
 
-        await StopAsync(stopRenewal, renewal);
+        await StopAsync(renewalTimer, renewal);
         var status = context.Response.StatusCode;
 
         // The outcome is recorded even if the client has gone away: the side effect happened, and the retry that
@@ -252,40 +254,33 @@ public sealed partial class IdempotencyMiddleware(
         IdempotencyTelemetry.Record(IdempotencyOutcomes.Executed);
     }
 
-    private async Task RenewUntilStoppedAsync(string storageKey, string ownerToken, TimeSpan lease, CancellationTokenSource leaseLost, CancellationToken stop)
+    private async Task RenewUntilStoppedAsync(PeriodicTimer timer, string storageKey, string ownerToken, TimeSpan lease, CancellationTokenSource leaseLost)
     {
-        using var timer = new PeriodicTimer(lease / 3, timeProvider);
-        try
+        while (await timer.WaitForNextTickAsync())
         {
-            while (await timer.WaitForNextTickAsync(stop))
+            bool renewed;
+            try
             {
-                bool renewed;
-                try
-                {
-                    renewed = await store.RenewAsync(storageKey, ownerToken, lease, stop);
-                }
-                catch (Exception ex) when (ex is not OperationCanceledException)
-                {
-                    // A transient store error is not yet a lost lease; the next tick tries again before it lapses.
-                    LogRenewFailed(logger, ex, storageKey);
-                    continue;
-                }
-
-                if (!renewed)
-                {
-                    await leaseLost.CancelAsync();
-                    return;
-                }
+                renewed = await store.RenewAsync(storageKey, ownerToken, lease, CancellationToken.None);
             }
-        }
-        catch (OperationCanceledException) when (stop.IsCancellationRequested)
-        {
+            catch (Exception ex)
+            {
+                // A transient store error is not yet a lost lease; the next tick tries again before it lapses.
+                LogRenewFailed(logger, ex, storageKey);
+                continue;
+            }
+
+            if (!renewed)
+            {
+                await leaseLost.CancelAsync();
+                return;
+            }
         }
     }
 
-    private static async Task StopAsync(CancellationTokenSource stopRenewal, Task renewal)
+    private static async Task StopAsync(PeriodicTimer renewalTimer, Task renewal)
     {
-        await stopRenewal.CancelAsync();
+        renewalTimer.Dispose();
         await renewal;
     }
 

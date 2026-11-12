@@ -8,7 +8,7 @@
     "cpu": "13th Gen Intel Core i7-13620H (10 cores / 16 threads), 15.7 GB RAM",
     "hostLoad": "Windows CPU load ~60% before the run; 11 other containers running (another agent\u0027s load lab among them); Docker VM 16 vCPU / 7.6 GB",
     "redis": "redis:7-alpine in Docker Desktop (Testcontainers), loopback TCP",
-    "timestampUtc": "2026-11-12 08:59:49Z"
+    "timestampUtc": "2026-11-12 09:01:05Z"
   },
   "result": [
     {
@@ -16,10 +16,10 @@
       "requests": 5000,
       "concurrency": 16,
       "repeats": 3,
-      "rpsMedian": 45573.49226936851,
-      "p50MsMedian": 0.27785,
-      "p95MsMedian": 0.49711500000000003,
-      "p99MsMedian": 1.1535060000000001,
+      "rpsMedian": 52465.51179582102,
+      "p50MsMedian": 0.2622,
+      "p95MsMedian": 0.44191,
+      "p99MsMedian": 0.8472280000000005,
       "statuses": {
         "201": 5000
       }
@@ -29,10 +29,10 @@
       "requests": 5000,
       "concurrency": 16,
       "repeats": 3,
-      "rpsMedian": 17708.574243728774,
-      "p50MsMedian": 0.52245,
-      "p95MsMedian": 2.9955600000000007,
-      "p99MsMedian": 6.302173000000006,
+      "rpsMedian": 29347.37311663233,
+      "p50MsMedian": 0.3599,
+      "p95MsMedian": 1.2467650000000006,
+      "p99MsMedian": 4.042113000000002,
       "statuses": {
         "201": 5000
       }
@@ -42,10 +42,10 @@
       "requests": 5000,
       "concurrency": 16,
       "repeats": 3,
-      "rpsMedian": 4778.263259943351,
-      "p50MsMedian": 2.8829000000000002,
-      "p95MsMedian": 5.539505000000005,
-      "p99MsMedian": 10.094660000000001,
+      "rpsMedian": 6135.74928052204,
+      "p50MsMedian": 2.4211,
+      "p95MsMedian": 3.8075850000000004,
+      "p99MsMedian": 5.315851000000001,
       "statuses": {
         "201": 5000
       }
@@ -55,10 +55,10 @@
       "requests": 5000,
       "concurrency": 16,
       "repeats": 3,
-      "rpsMedian": 9802.33589664417,
-      "p50MsMedian": 1.53985,
-      "p95MsMedian": 2.4738100000000003,
-      "p99MsMedian": 3.476894000000004,
+      "rpsMedian": 9660.510345440529,
+      "p50MsMedian": 1.4102999999999999,
+      "p95MsMedian": 3.273785,
+      "p99MsMedian": 4.651613,
       "statuses": {
         "201": 5000
       }
