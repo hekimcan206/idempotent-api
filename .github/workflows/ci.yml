@@ -1,0 +1,198 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
+
+jobs:
+  build-test:
+    name: build & test
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      - uses: actions/cache@v6
+        with:
+          path: ${{ env.NUGET_PACKAGES }}
+          key: nuget-${{ runner.os }}-${{ hashFiles('Directory.Packages.props', '**/*.csproj', 'global.json') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore
+
+      # Package versions are pinned and updated by hand, so a known vulnerability in any direct or
+      # transitive package fails the build. Fix it with a pinned upgrade in Directory.Packages.props.
+      - name: Audit for vulnerable packages
+        run: |
+          set -o pipefail
+          dotnet list package --vulnerable --include-transitive 2>&1 | tee vulnerable-packages.txt
+          if grep -q "has the following vulnerable packages" vulnerable-packages.txt; then
+            echo "::error::Known-vulnerable NuGet packages found (see the list above)"
+            exit 1
+          fi
+
+      - name: Format check
+        run: dotnet format --verify-no-changes --no-restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build --no-restore --configuration Release
+
+      # Unit, property and golden tests, then integration tests: Redis 7 starts through Testcontainers on the
+      # runner's Docker engine; multi-instance tests run several in-process hosts against it.
+      - name: Test
+        run: >
+          dotnet test --no-build --configuration Release
+          --coverage --coverage-output-format cobertura
+          --results-directory "${{ github.workspace }}/TestResults"
+
+      - name: Coverage summary
+        if: always()
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.5.12
+        with:
+          reports: TestResults/**/*.cobertura.xml
+          targetdir: coverage
+          reporttypes: MarkdownSummaryGithub
+          assemblyfilters: "-*Tests*;-IdempotentApi.Benchmarks;-DemoDriver;-PaymentsApi"
+          filefilters: "-*/obj/*"
+
+      - name: Publish coverage to job summary
+        if: always()
+        run: |
+          if [ -f coverage/SummaryGithub.md ]; then
+            cat coverage/SummaryGithub.md >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "No coverage report produced."
+          fi
+
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: test-results
+          path: TestResults/
+          retention-days: 7
+
+  packages:
+    name: NuGet packages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+
+      # The packages are the product: pack them, then build a fresh app that consumes them from the
+      # local feed exactly as a user would from nuget.org.
+      - name: Pack
+        run: |
+          dotnet pack src/IdempotentApi --configuration Release --output nupkg
+          dotnet pack src/IdempotentApi.Redis --configuration Release --output nupkg
+          ls -l nupkg
+
+      - name: Consume the packages from a new project
+        run: |
+          # Outside the checkout, so the repository's Directory.*.props (central package management) do not apply.
+          mkdir "$RUNNER_TEMP/consumer" && cd "$RUNNER_TEMP/consumer"
+          dotnet new web --framework net10.0 --name Consumer --output .
+          dotnet new nugetconfig
+          dotnet nuget add source "$GITHUB_WORKSPACE/nupkg" --name local
+          dotnet add package IdempotentApi.AspNetCore --version 1.0.0
+          dotnet add package IdempotentApi.Redis --version 1.0.0
+          cat > Program.cs <<'CS'
+          using IdempotentApi;
+          using IdempotentApi.Redis;
+
+          var builder = WebApplication.CreateBuilder(args);
+          builder.Services.AddIdempotency();
+          builder.Services.AddRedisIdempotencyStore("localhost:6379");
+          var app = builder.Build();
+          app.UseRouting();
+          app.UseIdempotency();
+          app.MapPost("/orders", () => Results.Created("/orders/1", new { id = 1 })).RequireIdempotency();
+          app.Run();
+          CS
+          dotnet build --configuration Release
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: nuget-packages
+          path: nupkg/*
+          retention-days: 14
+
+  container:
+    name: container image
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build sample image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          push: false
+          load: true
+          tags: idempotent-api-sample:ci
+          cache-from: type=gha,scope=sample
+          cache-to: type=gha,mode=max,scope=sample
+
+      - name: Verify the image runs as non-root
+        run: |
+          user=$(docker image inspect idempotent-api-sample:ci --format '{{.Config.User}}')
+          echo "user: ${user}"
+          test -n "${user}" && test "${user}" != "0" && test "${user}" != "root"
+
+  compose-demo:
+    name: docker compose demo
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      # The README promises `docker compose up` runs the whole demo with zero manual steps; this job keeps it true.
+      - name: Start the stack
+        run: docker compose up -d --build
+
+      - name: Every scenario passes against two instances
+        run: |
+          code=$(docker wait idempotent-api-demo-1)
+          docker compose logs --no-log-prefix demo | tee demo.log
+          test "${code}" = "0"
+          grep -q '"scenarios":6,"passed":6,"failures":\[\]' demo.log
+          grep -qE 'PASS  concurrent-duplicates .*charges run: 1$' demo.log
+          grep -qE 'PASS  wait-mode .*distinct bodies: 1; charges run: 1$' demo.log
+
+      - name: A retry on the other instance is a replay
+        run: |
+          key="\"ci-$(cat /proc/sys/kernel/random/uuid)\""
+          body='{"amount":"125.50","currency":"TRY","merchantReference":"ci-check"}'
+          curl -sf -o /dev/null -X POST localhost:58180/payments -H "Idempotency-Key: $key" -H 'X-Client-Id: ci' -H 'Content-Type: application/json' -d "$body"
+          curl -s -D headers.txt -o /dev/null -X POST localhost:58181/payments -H "Idempotency-Key: $key" -H 'X-Client-Id: ci' -H 'Content-Type: application/json' -d "$body"
+          cat headers.txt
+          grep -qi '^idempotent-replayed: true' headers.txt
+
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs
